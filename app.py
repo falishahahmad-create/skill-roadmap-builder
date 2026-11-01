@@ -1,4 +1,5 @@
 import streamlit as st
+from planner import generate_plan
 
 st.set_page_config(page_title="Skill Roadmap Builder", page_icon="🗺️", layout="wide")
 
@@ -17,7 +18,16 @@ if submitted:
         st.warning("Please enter a goal first.")
     else:
         st.session_state["goal"] = goal
-        st.session_state["days"] = days
-        st.session_state["hours"] = hours
-        st.session_state["level"] = level
-        st.success(f"Goal saved: {goal} in {days} days, {hours} hrs/day ({level})")
+        st.session_state["plan"] = generate_plan(goal, days, hours, level)
+
+if "plan" in st.session_state:
+    st.subheader(f"Your roadmap: {st.session_state['goal']}")
+    for item in st.session_state["plan"]:
+        with st.expander(f"Day {item['day']} · {item['phase']}"):
+            for task in item["tasks"]:
+                st.write(f"- {task}")
+            if item["mini_project"]:
+                st.info(item["mini_project"])
+            st.write("Resources:")
+            for name, url in item["resources"].items():
+                st.markdown(f"- [{name}]({url})")
